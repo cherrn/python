@@ -11,6 +11,7 @@ class Article(db.Model):
     text = db.Column(db.Text, nullable=False)
     description = db.Column(db.Text, nullable=False)
     image_url = db.Column(db.String(200))
+    image_file = db.Column(db.String(200))
     date = db.Column(db.DateTime, default=datetime.utcnow)
     language = db.Column(db.String(2), nullable=False)
 

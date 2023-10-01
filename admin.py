@@ -17,5 +17,7 @@ def is_admin(username, password):
 
         return token
     else:
+# token_payload = { 'username': username,}
+# default_token = jwt.encode(token_payload, str(DEFAULT_USER_TOKEN), algorithm='HS256') - токен будет начинатся с eyJh
         default_token = str(DEFAULT_USER_TOKEN)
         return default_token

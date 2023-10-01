@@ -2,26 +2,33 @@ from flask import jsonify, request, redirect, Response, abort
 
 from models import db, Article
 from config import Config
+from create_service import save_file
 
 
-def create():
+def create():  
     json_data = request.get_json()
 
     password = json_data.get('password')
     title = json_data.get('title')
     text = json_data.get('text')
     description = json_data.get('description')
-    image_url = json_data.get('image_url')
     language = json_data.get('language')
+    image_file = json_data.get('image_file')
+    image_url = json_data.get('image_url')
 
-    if password == Config.PASSWORD_TO_ADD_NEWS:  # Проверка пароля (замените на свой)
-        article = Article(title=title, text=text, description=description ,image_url=image_url, language=language)
-        try:
-            db.session.add(article)
-            db.session.commit()
-            return redirect('/')
-        except:
-            return 'ERROR'
+    if password == Config.PASSWORD_TO_ADD_NEWS:
+        file_path = save_file(image_file)
+        if file_path:
+            article = Article(title=title, text=text, description=description,
+                              image_file=file_path,image_url=image_url, language=language)
+            try:
+                db.session.add(article)
+                db.session.commit()
+                return jsonify({'message': 'Article created successfully', 'image_file': file_path})
+            except Exception as e:
+                return jsonify({'error': str(e)})    
+    return 'ERROR'
+
 
 def show_ukr_news():
 
@@ -35,6 +42,7 @@ def show_ukr_news():
             'title': article.title,
             'description': article.description,
             'image_url': article.image_url,
+            'image_file': article.image_file,
             'date': article.date.strftime('%Y-%m-%d %H:%M:%S')
         }
 
@@ -55,6 +63,7 @@ def show_eng_news():
             'title': article.title,
             'description': article.description,
             'image_url': article.image_url,
+            'image_file': article.image_file,
             'date': article.date.strftime('%Y-%m-%d %H:%M:%S')
         }
 
@@ -77,6 +86,7 @@ def show_new_details(new_id):
         'title': article.title,
         'text': article.text,
         'image_url': article.image_url,
+        'image_file': article.image_file,
         'date': article.date.strftime('%Y-%m-%d %H:%M:%S')
     }
 
