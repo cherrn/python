@@ -14,29 +14,36 @@ def create():
     title = json_data.get('title')
     text = json_data.get('text')
     description = json_data.get('description')
-    image_url = json_data.get('image_url')
     language = json_data.get('language')
+    image_url = json_data.get('image_url')
 
-    if password == Config.PASSWORD_TO_ADD_NEWS:  # Проверка пароля (замените на свой)
-        article = Article(title=title, text=text, description=description ,image_url=image_url, language=language)
+    if password == Config.PASSWORD_TO_ADD_NEWS:
+        article = Article(title=title, text=text, description=description,
+                           image_url=image_url, language=language)
+            
         try:
             db.session.add(article)
             db.session.commit()
             return redirect('/')
-        except:
-            return 'ERROR'
+            
+        except Exception as e:
+            return jsonify({'error': str(e)})
+    return 'ERROR'
 
 
 def show_ukr_news():
     session = db.session  # Получение сессии из объекта db
     articles = session.query(Article).filter(func.lower(Article.language) == 'uk').order_by(Article.date.desc()).all()
 
-    locale.setlocale(locale.LC_TIME, 'uk_UA.utf8')
+    # Определите часовой пояс Украины (Europe/Kiev)
     ukraine_timezone = timezone('Europe/Kiev')
-
     article_list = []
+
     for article in articles:
         local_time = article.date.astimezone(ukraine_timezone)
+        local_time = article.date.astimezone(ukraine_timezone)
+        locale.setlocale(locale.LC_TIME, 'uk_UA.utf8')
+
         formatted_date = local_time.strftime('%Y  %d-%B   %H:%M')
 
         article_dict = {
@@ -57,13 +64,14 @@ def show_eng_news():
     articles = session.query(Article).filter(func.lower(Article.language) == 'en').order_by(Article.date.desc()).all()
 
     ukraine_timezone = timezone('Europe/Kiev')
-    locale.setlocale(locale.LC_TIME
-                     , 'en_US.utf8')
+    locale.setlocale(locale.LC_TIME, 'en_US.utf8')
+    ukraine_timezone = timezone('Europe/Kiev')
     article_list = []
+    locale.setlocale(locale.LC_TIME, 'en_US.utf8')
+
     for article in articles:
         local_time = article.date.astimezone(ukraine_timezone)
         formatted_date = local_time.strftime('%Y  %d-%B   %H:%M')
-
         article_dict = {
             'id': article.id,
             'title': article.title,
@@ -75,7 +83,6 @@ def show_eng_news():
         article_list.append(article_dict)
 
     return jsonify(article_list)
-
 
 
 def show_new_details(new_id):
@@ -97,8 +104,8 @@ def show_new_details(new_id):
 
 
 def delete_new(new_id):
-    session = db.session  
-    article = session.get(Article, new_id)  
+    session = db.session
+    article = session.get(Article, new_id)
 
     if article is None:
         return abort(404)  # Возвращаем ошибку 404, если статья не найдена
