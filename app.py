@@ -1,12 +1,9 @@
 from flask import Flask
-from dotenv import load_dotenv, find_dotenv
 from flask_cors import CORS
 from models import db
 from config import Config
 from views import views_bp
 
-# configuration
-load_dotenv(find_dotenv())
 
 app = Flask(__name__)
 app.config.from_object(Config)

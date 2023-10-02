@@ -1,4 +1,7 @@
+import locale
 from flask import jsonify, request, redirect, Response, abort
+from sqlalchemy import func
+from pytz import timezone
 
 from models import db, Article
 from config import Config
@@ -23,19 +26,25 @@ def create():
         except:
             return 'ERROR'
 
-def show_ukr_news():
 
+def show_ukr_news():
     session = db.session  # Получение сессии из объекта db
-    articles = session.query(Article).filter_by(language='uk').order_by(Article.date.desc()).all()
+    articles = session.query(Article).filter(func.lower(Article.language) == 'uk').order_by(Article.date.desc()).all()
+
+    locale.setlocale(locale.LC_TIME, 'uk_UA.utf8')
+    ukraine_timezone = timezone('Europe/Kiev')
 
     article_list = []
     for article in articles:
+        local_time = article.date.astimezone(ukraine_timezone)
+        formatted_date = local_time.strftime('%Y  %d-%B   %H:%M')
+
         article_dict = {
             'id': article.id,
             'title': article.title,
             'description': article.description,
             'image_url': article.image_url,
-            'date': article.date.strftime('%Y-%m-%d %H:%M:%S')
+            'date': formatted_date
         }
 
         article_list.append(article_dict)
@@ -44,18 +53,23 @@ def show_ukr_news():
 
 
 def show_eng_news():
-
     session = db.session  # Получение сессии из объекта db
-    articles = session.query(Article).filter_by(language='en').order_by(Article.date.desc()).all()
+    articles = session.query(Article).filter(func.lower(Article.language) == 'en').order_by(Article.date.desc()).all()
 
+    ukraine_timezone = timezone('Europe/Kiev')
+    locale.setlocale(locale.LC_TIME
+                     , 'en_US.utf8')
     article_list = []
     for article in articles:
+        local_time = article.date.astimezone(ukraine_timezone)
+        formatted_date = local_time.strftime('%Y  %d-%B   %H:%M')
+
         article_dict = {
             'id': article.id,
             'title': article.title,
             'description': article.description,
             'image_url': article.image_url,
-            'date': article.date.strftime('%Y-%m-%d %H:%M:%S')
+            'date': formatted_date
         }
 
         article_list.append(article_dict)
@@ -67,8 +81,7 @@ def show_eng_news():
 def show_new_details(new_id):
     session = db.session  # Получение сессии из объекта db
 
-    article = session.get(Article, new_id)  # Использование Session.get() для получения статьи по ID
-
+    article = session.get(Article, new_id)
     if article is None:
         print(id)
         return jsonify({'error': 'Article not found'})
