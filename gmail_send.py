@@ -1,12 +1,11 @@
-import os
 import smtplib
 from email.mime.text import MIMEText
 
 
 def send_email(message):
-    sender = os.getenv('EMAIL')
-    password = os.getenv('PASSWORD')
-        
+    sender = "send.email.test.post@gmail.com"
+    password = "aqentcxulyldqmzt"
+
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()
 
